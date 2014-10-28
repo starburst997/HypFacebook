@@ -13,6 +13,8 @@ package fr.hyperfiction;
 
 import flash.events.Event;
 import flash.events.EventDispatcher;
+import openfl.events.TimerEvent;
+import openfl.utils.Timer;
 
 /**
  * ...
@@ -21,6 +23,7 @@ import flash.events.EventDispatcher;
 @:build( ShortCuts.mirrors( ) ) class HypFacebook extends EventDispatcher{
 
 	private var _sApp_id : String;
+	public var sFacebook_token:String;
 
 	#if android
 	private var _JNI_instance : Dynamic;
@@ -63,6 +66,7 @@ import flash.events.EventDispatcher;
 			var bSessionValid = false;
 
 			#if android
+			trace("DEBUG: Calling jni_connect");
 			bSessionValid = jni_connect( _JNI_instance, allowUI );
 			#end
 
@@ -75,7 +79,9 @@ import flash.events.EventDispatcher;
 		}
 
 		public function connectForRead( allowUI : Bool, permissions : Array<String> ) : Bool {
-			trace("connect for read");
+			#if android
+			trace("Connect for read, perms=" + permissions.join("&"));
+			#end
 
 			var bSessionValid = false;
 
@@ -280,6 +286,11 @@ import flash.events.EventDispatcher;
 			#if android
 
 				HypFB_set_event_callback( _onEvent );
+				
+				// queue for events
+				_timer = new Timer(50, 0); // 50ms
+				_timer.addEventListener(TimerEvent.TIMER, _update);
+				_timer.start();
 
 				#if debug
 				traceHash( );
@@ -293,6 +304,19 @@ import flash.events.EventDispatcher;
 				HypFB_set_event_callback( _onEvent );
 			#end
 		}
+		
+		#if android
+		private var _timer:Timer;
+		private function _update(e:TimerEvent):Void
+		{
+			
+			var event:Array<String> = nextEvent(_JNI_instance);
+			if (event != null) {
+				_onEvent(event[0], event[1], event[2]);
+			}
+			
+		}
+		#end
 
 		/**
 		*
@@ -310,12 +334,14 @@ import flash.events.EventDispatcher;
 				case HypFacebookEvent.OPENED:
 					ev = new HypFacebookEvent( sEventType );
 					ev.sFacebook_token = sArg1;
+					sFacebook_token = sArg1; // store token
 
 				case HypFacebookEvent.CLOSED_LOGIN_FAILED:
 					ev = new HypFacebookEvent( sEventType );
 
 				case HypFacebookEvent.OPENED_TOKEN_UPDATED:
 					ev = new HypFacebookEvent( sEventType );
+					sFacebook_token = sArg1; // store token
 					ev.sFacebook_token = sArg1;
 
 				case DIALOG_CANCELED:
@@ -332,6 +358,9 @@ import flash.events.EventDispatcher;
 
 				case GRAPH_REQUEST_RESULTS:
 					ev = _dispatch_request_event( sEventType , sArg2 , sArg1 );
+					
+				case HypFacebookEvent.ERROR:
+					ev = new HypFacebookEvent(sEventType);
 
 				default:
 					trace('pas connu');
@@ -553,12 +582,6 @@ import flash.events.EventDispatcher;
 
 		}
 
-		/**
-		*
-		*
-		* @public
-		* @return	void
-		*/
 		@JNI("fr.hyperfiction.HypFacebook","disconnect")
 		public function jni_disconnect( instance : Dynamic ) : Void {
 
@@ -568,7 +591,7 @@ import flash.events.EventDispatcher;
 		public function jni_dialog( instance : Dynamic, sAction : String, sKeys : String , sVals : String ) : Void {
 
 		}
-
+		
 		/**
 		*
 		*
@@ -602,15 +625,14 @@ import flash.events.EventDispatcher;
 
 		}
 
-		/**
-		*
-		*
-		* @public
-		* @return	void
-		*/
 		@JNI
 		public function getPermissions( instance : Dynamic ) : String {
 
+		}
+		
+		@JNI
+		public function nextEvent( instance: Dynamic):Array<String> {
+			
 		}
 
 		#end
@@ -653,6 +675,7 @@ class HypFacebookEvent extends Event{
 	public static inline var OPENED					: String = 'OPENED';
 	public static inline var CLOSED_LOGIN_FAILED	: String = 'CLOSED_LOGIN_FAILED';
 	public static inline var OPENED_TOKEN_UPDATED	: String = 'OPENED_TOKEN_UPDATED';
+	public static inline var ERROR				    : String = 'ERROR';
 
 	// -------o constructor
 

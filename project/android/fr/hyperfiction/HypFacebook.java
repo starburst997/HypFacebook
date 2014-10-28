@@ -50,6 +50,9 @@ import org.haxe.lime.GameActivity;
 import org.haxe.lime.HaxeObject;
 import org.haxe.lime.Lime;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import fr.hyperfiction.QueueEventObject;
+
 import ::APP_PACKAGE::.R;
 
 /**
@@ -115,13 +118,15 @@ public class HypFacebook {
 		*/
 		public boolean connect( boolean allowUI ){
 			Session session = _createSession( );
-			trace( "Session state: "+session.getState( ) );
+			trace( "Java: Session state: "+session.getState( ) );
 			if ( session.isOpened( ) ) {
 				return true;
 			}
+			trace("Java: Opening request");
 			Session.OpenRequest req = _createOpenRequest( session );
 			if ( SessionState.CREATED_TOKEN_LOADED.equals(session.getState()) || ( allowUI && !SessionState.OPENING.equals(session.getState()) ) ) {
 				try{
+					trace("Open for read");
 					session.openForRead( req );
 				} catch( Exception e) {
 					trace( "Exception in openForRead");
@@ -154,11 +159,13 @@ public class HypFacebook {
 		}
 
 		public boolean connectForRead( boolean allowUI, String sPerms ) {
+			trace("Java: connect for read, perms=" + sPerms);
 			Session session = _createSession( );
 			if ( session.isOpened( ) ) {
 				return true;
 			}
 			Session.OpenRequest req = _createOpenRequest( session );
+			trace("Java: setPermissionsd");
 			req.setPermissions( _createPermissionsFromString( sPerms ) );
 			if ( SessionState.CREATED_TOKEN_LOADED.equals(session.getState()) || allowUI ) {
 				try{
@@ -343,12 +350,13 @@ public class HypFacebook {
 			} else {
 				session = new Session.Builder( GameActivity.getInstance( ) ).setApplicationId(_sAppID).build();
 				Session.setActiveSession( session );
-				trace( "new session created..." );
+				trace( "Java: new session created..." );
 			}
 			return session;
 		}
 
 		private Session.OpenRequest _createOpenRequest( Session session ) {
+			trace("Java: _createOpenRequest");
 			Session.OpenRequest req = new Session.OpenRequest( GameActivity.getInstance( ) );
 			req.setCallback( new Session.StatusCallback( ){
 			    @Override
@@ -424,10 +432,10 @@ public class HypFacebook {
 
 
 		private WebDialog.OnCompleteListener listener_dialog = new WebDialog.OnCompleteListener( ){
-
+			
 						@Override
 			public void onComplete(Bundle values, FacebookException error) {
-				trace("onComplete");
+				trace("Java: WebDialog onComplete");
 				if( error != null ){
 					onFBEventWrapper( DIALOG_ERROR , error.toString( ) , "" );
 				}else{
@@ -450,6 +458,7 @@ public class HypFacebook {
 
 			@Override
 		    public void onCompleted(Response response) {
+				trace("Java: Request onComplete");
 
 			String sGraphPath = response.getRequest( ).getGraphPath( );
 
@@ -464,13 +473,48 @@ public class HypFacebook {
 			}
 
 		};
-
+		
 		private void onFBEventWrapper( final String arg0, final String arg1, final String arg2 ) {
+			trace("Java: onFBEventWrapper :: " + arg0 + " :: " + arg1);
+			
+			try {
+				QueueEventObject obj = new QueueEventObject();
+				obj.arg0 = arg0;
+				obj.arg1 = arg1;
+				obj.arg2 = arg2;
+				
+				_eventQueue.add(obj);
+			} catch (IllegalStateException ex) {
+				//
+			}
+			
 			_mSurface.queueEvent(new Runnable() {
 				@Override
 				public void run() {
+					trace("Java: onFBEvent");
 					onFBEvent( arg0, arg1, arg2 );
 				}
 			});
+		}
+		
+		// custom queue
+		private ArrayBlockingQueue<QueueEventObject> _eventQueue = new ArrayBlockingQueue<QueueEventObject>(20);
+		
+		public String[] nextEvent()
+		{
+			if (_eventQueue.size() == 0) {
+				return null;
+			} else {
+				try {
+					QueueEventObject obj = _eventQueue.take();
+					String[] ret = new String[3];
+					ret[0] = obj.arg0;
+					ret[1] = obj.arg1;
+					ret[2] = obj.arg2;
+					return ret;
+				} catch (InterruptedException ex) {
+					return null;
+				}
+			}
 		}
 }

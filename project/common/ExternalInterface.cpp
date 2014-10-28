@@ -48,6 +48,7 @@ using namespace hypfacebook;
 AutoGCRoot *eval_onConnect = 0;
 AutoGCRoot *eval_onEvent = 0;
 
+
 extern "C"{
 
 	void hypfacebook_main () {}
@@ -62,18 +63,32 @@ extern "C"{
 		#ifdef ANDROID
 		ALOG("hypfb_dispatch_event" );
 		
+		/*
+		// This code isn't working on Android
+		// Removed and placed event code in a queue in HypFacebook.java
+		
         int top = 0;
         gc_set_top_of_stack(&top, true);
         gc_exit_blocking();
-        #endif
+		
 		val_call3(
 					eval_onEvent->get( ) ,
 					alloc_string( sType ) ,
 					alloc_string( sArg1 ) ,
 					alloc_string( sArg2 )
 				);
-        #ifdef ANDROID
-        gc_enter_blocking();
+		
+        gc_enter_blocking();*/
+		
+		#else
+		
+		val_call3(
+					eval_onEvent->get( ) ,
+					alloc_string( sType ) ,
+					alloc_string( sArg1 ) ,
+					alloc_string( sArg2 )
+				);
+		
         #endif
 	}
 
