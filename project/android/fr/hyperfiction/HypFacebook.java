@@ -475,7 +475,7 @@ public class HypFacebook {
 		};
 		
 		private void onFBEventWrapper( final String arg0, final String arg1, final String arg2 ) {
-			trace("Java: onFBEventWrapper :: " + arg0 + " :: " + arg1);
+			trace("Java: onFBEventWrapper: " + arg0 + ", " + arg1);
 			
 			try {
 				QueueEventObject obj = new QueueEventObject();
