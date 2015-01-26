@@ -17,8 +17,11 @@
 	    <compilerflag value="-Iinclude"/>
 	    <file name="iPhone/HypFacebook.mm"/>
 	</files>
-
-	<set name="name_prefix" value="lib" if="iphone"/>
+	
+	<files id="android">
+	</files>
+	
+	<!--<set name="name_prefix" value="lib" if="iphone"/>
 	<set name="IOS_ARCH" value="-v7" if="HXCPP_ARMV7"/>
 	<set name="name_extra" value=".iphoneos${IOS_ARCH}" if="iphoneos"/>
 	<set name="name_extra" value=".iphonesim" if="iphonesim"/>
@@ -29,15 +32,18 @@
 	<set name="ndll-tool" value="static_link" if="iphone"/>
 	<set name="SLIBEXT" value=".lib" if="windows"/>
 	<set name="SLIBEXT" value=".a" unless="windows"/>
-	<set name="SLIBEXT" value=".so" if="webos"/>
+	<set name="SLIBEXT" value=".so" if="webos"/>-->
 
-	<target id="NDLL" output="${name_prefix}hypfacebook${debug_extra}${name_extra}" tool="linker" toolid="${ndll-tool}">
+	<target id="NDLL" output="${LIBPREFIX}hypfacebook${debug_extra}${LIBEXTRA}" tool="linker" toolid="${STD_MODULE_LINK}">
 
 		<outdir name="../ndll/${BINDIR}"/>
 		<ext value=".ndll" unless="mobile"/>
 		<files id="common"/>
-		<files id="iphone" if="iphone"/>
-
+		
+        <!-- Compile the right files depending of current target platform -->
+        <files id="iphone" if="iphone"/>
+        <files id="android" if="android"/>
+		
 	</target>
 
 	<target id="default">
