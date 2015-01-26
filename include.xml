@@ -59,6 +59,7 @@
 			
 			<ios linker-flags="-v -fobjc-arc" />
 			
+			<dependency name="Facebook.framework" />
 			<dependency name="Security.framework" />
 			<dependency name="Social.framework" />
 			<dependency name="Accounts.framework" />
