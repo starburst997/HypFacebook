@@ -14,16 +14,7 @@
  * limitations under the License.
  */
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
-#import "FBOpenGraphActionParams.h"
-
-/*!
- @class FBOpenGraphActionShareDialogParams
-
- @abstract Deprecated. Use `FBOpenGraphActionParams` instead.
- */
-__attribute__((deprecated))
-@interface FBOpenGraphActionShareDialogParams : FBOpenGraphActionParams
-
-@end
+UIColor *FBUIColorWithRGBA(uint8_t r, uint8_t g, uint8_t b, CGFloat a);
+UIColor *FBUIColorWithRGB(uint8_t r, uint8_t g, uint8_t b);

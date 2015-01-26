@@ -16,14 +16,10 @@
 
 #import <Foundation/Foundation.h>
 
-#import "FBOpenGraphActionParams.h"
+#ifdef __cplusplus
+#define FBSDK_EXTERN extern "C" __attribute__((visibility ("default")))
+#else
+#define FBSDK_EXTERN extern __attribute__((visibility ("default")))
+#endif
 
-/*!
- @class FBOpenGraphActionShareDialogParams
-
- @abstract Deprecated. Use `FBOpenGraphActionParams` instead.
- */
-__attribute__((deprecated))
-@interface FBOpenGraphActionShareDialogParams : FBOpenGraphActionParams
-
-@end
+#define FBSDK_STATIC_INLINE static inline

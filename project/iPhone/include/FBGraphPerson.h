@@ -16,55 +16,54 @@
 
 #import <Foundation/Foundation.h>
 
-#import "FBGraphLocation.h"
 #import "FBGraphObject.h"
 
 /*!
  @protocol
 
  @abstract
- The `FBGraphPlace` protocol enables typed access to a place object
- as represented in the Graph API.
+ The `FBGraphPerson` protocol enables typed access to a person's name, photo
+ and context-specific identifier as represented in the Graph API.
 
 
  @discussion
- The `FBGraphPlace` protocol represents the most commonly used properties of a
- Facebook place object. It may be used to access an `NSDictionary` object that has
- been wrapped with an <FBGraphObject> facade.
+ The `FBGraphPerson` protocol provides access to the name, picture and context-specific
+ ID of a person represented by a graph object. It may be used to access an `NSDictionary`
+ object that has been wrapped with an <FBGraphObject> facade.
  */
-@protocol FBGraphPlace<FBGraphObject>
+@protocol FBGraphPerson<FBGraphObject>
 
 /*!
- @abstract use objectID instead
- @deprecated use objectID instead
- */
-@property (retain, nonatomic) NSString *id __attribute__ ((deprecated("use objectID instead")));
-
-/*!
-@property
-@abstract Typed access to the place ID.
-@discussion Note this typically refers to the "id" field of the graph object (i.e., equivalent
+ @property
+ @abstract Typed access to the user ID.
+ @discussion Note this typically refers to the "id" field of the graph object (i.e., equivalent
  to `[self objectForKey:@"id"]`) but is differently named to avoid conflicting with Apple's
  non-public selectors.
-*/
+ */
 @property (retain, nonatomic) NSString *objectID;
 
 /*!
  @property
- @abstract Typed access to the place name.
+ @abstract Typed access to the user's name.
  */
 @property (retain, nonatomic) NSString *name;
 
 /*!
  @property
- @abstract Typed access to the place category.
+ @abstract Typed access to the user's first name.
  */
-@property (retain, nonatomic) NSString *category;
+@property (retain, nonatomic) NSString *first_name;
 
 /*!
  @property
- @abstract Typed access to the place location.
+ @abstract Typed access to the user's middle name.
  */
-@property (retain, nonatomic) id<FBGraphLocation> location;
+@property (retain, nonatomic) NSString *middle_name;
+
+/*!
+ @property
+ @abstract Typed access to the user's last name.
+ */
+@property (retain, nonatomic) NSString *last_name;
 
 @end

@@ -16,14 +16,14 @@
 
 #import <Foundation/Foundation.h>
 
-#import "FBOpenGraphActionParams.h"
+#import "FBPhotoParams.h"
 
 /*!
- @class FBOpenGraphActionShareDialogParams
+ @class FBShareDialogPhotoParams
 
- @abstract Deprecated. Use `FBOpenGraphActionParams` instead.
- */
+ @abstract Deprecated. Use `FBPhotoParams` instead.
+*/
 __attribute__((deprecated))
-@interface FBOpenGraphActionShareDialogParams : FBOpenGraphActionParams
+@interface FBShareDialogPhotoParams : FBPhotoParams
 
 @end
