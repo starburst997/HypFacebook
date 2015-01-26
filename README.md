@@ -1,9 +1,9 @@
 HypFacebook
 =============================
-A Facebook native extension for NME
+A Facebook native extension for OpenFL
 -----------------------------
 
-This NME native extension allows you to integrate Facebook into your NME application.
+This OpenFL native extension allows you to integrate Facebook into your OpenFL application.
 
 It integrates the [Facebook iOS SDK 3.22.0](https://github.com/facebook/facebook-ios-sdk)
 and the [Facebook Android SDK 3.22.0](https://github.com/facebook/facebook-android-sdk)
