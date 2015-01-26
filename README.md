@@ -87,6 +87,12 @@ Example with the template tag in the nmml file:
 
 ```
 
+In your Facebook App settings, add Android Platform, then search for these traces
+```
+I/trace   (32187): nme_key_hash : +fr.hyperfiction.fbexample 
+I/trace   (32187): PXR : pRqGr00vyKadfeNtfCttxWWk8JflaJk=
+```
+
 Recompiling
 -----------
 For recompiling the native extensions just use the sh files contained in the project folder
