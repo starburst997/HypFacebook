@@ -43,7 +43,7 @@ Add a CFBundleURLTypes key in your app-Info.plist with "fb<appid>":
         <dict>
             <key>CFBundleURLSchemes</key>
             <array>
-                <string>fb_______________</string>
+                <string>fb123456789XXXXX</string>
             </array>
         </dict>
     </array>
