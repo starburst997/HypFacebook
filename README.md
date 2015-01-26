@@ -5,7 +5,7 @@ A Facebook native extension for NME
 
 This NME native extension allows you to integrate Facebook into your NME application.
 
-It integrates the [Facebook iOS SDK 3.5.1](https://github.com/facebook/facebook-ios-sdk)
+It integrates the [Facebook iOS SDK 3.22.0](https://github.com/facebook/facebook-ios-sdk)
 and the [Facebook Android SDK 3.22.0](https://github.com/facebook/facebook-android-sdk)
 
 These are under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
@@ -49,10 +49,7 @@ Add a CFBundleURLTypes key in your app-Info.plist with "fb<appid>":
     </array>
 
 ```
-Also mind to add the FacebookSDK.framework and the bundles,
-to the framework folder in XCode before building. Check that you
-choose "Create groups for any added folders"
-and deselect 'Copy items into destination group's folder (if needed)'.
+Add FacebookSDK.framework to /Library/Frameworks/.
 
 If you target ios < 6 (iOS > 5.0 is supported), toggle this framework to optional:
 - Security
