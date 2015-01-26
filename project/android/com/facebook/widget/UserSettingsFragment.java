@@ -27,10 +27,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import com.facebook.*;
 import ::APP_PACKAGE::.R;
+import com.facebook.internal.AnalyticsEvents;
+import com.facebook.internal.ImageDownloader;
+import com.facebook.internal.ImageRequest;
+import com.facebook.internal.ImageResponse;
 import com.facebook.model.GraphUser;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -50,7 +55,7 @@ public class UserSettingsFragment extends FacebookFragment {
     private static final String ID = "id";
     private static final String PICTURE = "picture";
     private static final String FIELDS = "fields";
-
+    
     private static final String REQUEST_FIELDS = TextUtils.join(",", new String[] {ID, NAME, PICTURE});
 
     private LoginButton loginButton;
@@ -64,19 +69,21 @@ public class UserSettingsFragment extends FacebookFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(::APP_PACKAGE::.R.layout.com_facebook_usersettingsfragment, container, false);
-        loginButton = (LoginButton) view.findViewById(::APP_PACKAGE::.R.id.com_facebook_usersettingsfragment_login_button);
+        View view = inflater.inflate(R.layout.com_facebook_usersettingsfragment, container, false);
+        loginButton = (LoginButton) view.findViewById(R.id.com_facebook_usersettingsfragment_login_button);
         loginButton.setProperties(loginButtonProperties);
         loginButton.setFragment(this);
+        loginButton.setLoginLogoutEventName(AnalyticsEvents.EVENT_USER_SETTINGS_USAGE);
+
         Session session = getSession();
         if (session != null && !session.equals(Session.getActiveSession())) {
             loginButton.setSession(session);
         }
-        connectedStateLabel = (TextView) view.findViewById(::APP_PACKAGE::.R.id.com_facebook_usersettingsfragment_profile_name);
-
+        connectedStateLabel = (TextView) view.findViewById(R.id.com_facebook_usersettingsfragment_profile_name);
+        
         // if no background is set for some reason, then default to Facebook blue
         if (view.getBackground() == null) {
-            view.setBackgroundColor(getResources().getColor(::APP_PACKAGE::.R.color.com_facebook_blue));
+            view.setBackgroundColor(getResources().getColor(R.color.com_facebook_blue));
         } else {
             view.getBackground().setDither(true);
         }
@@ -169,6 +176,31 @@ public class UserSettingsFragment extends FacebookFragment {
 
     /**
      * Set the permissions to use when the session is opened. The permissions here
+     * can only be read permissions. If any publish permissions are included, the login
+     * attempt by the user will fail. The LoginButton can only be associated with either
+     * read permissions or publish permissions, but not both. Calling both
+     * setReadPermissions and setPublishPermissions on the same instance of LoginButton
+     * will result in an exception being thrown unless clearPermissions is called in between.
+     * <p/>
+     * This method is only meaningful if called before the session is open. If this is called
+     * after the session is opened, and the list of permissions passed in is not a subset
+     * of the permissions granted during the authorization, it will log an error.
+     * <p/>
+     * Since the session can be automatically opened when the UserSettingsFragment is constructed,
+     * it's important to always pass in a consistent set of permissions to this method, or
+     * manage the setting of permissions outside of the LoginButton class altogether
+     * (by managing the session explicitly).
+     *
+     * @param permissions the read permissions to use
+     *
+     * @throws UnsupportedOperationException if setPublishPermissions has been called
+     */
+    public void setReadPermissions(String... permissions) {
+        loginButtonProperties.setReadPermissions(Arrays.asList(permissions), getSession());
+    }
+
+    /**
+     * Set the permissions to use when the session is opened. The permissions here
      * should only be publish permissions. If any read permissions are included, the login
      * attempt by the user may fail. The LoginButton can only be associated with either
      * read permissions or publish permissions, but not both. Calling both
@@ -191,6 +223,32 @@ public class UserSettingsFragment extends FacebookFragment {
      */
     public void setPublishPermissions(List<String> permissions) {
         loginButtonProperties.setPublishPermissions(permissions, getSession());
+    }
+
+    /**
+     * Set the permissions to use when the session is opened. The permissions here
+     * should only be publish permissions. If any read permissions are included, the login
+     * attempt by the user may fail. The LoginButton can only be associated with either
+     * read permissions or publish permissions, but not both. Calling both
+     * setReadPermissions and setPublishPermissions on the same instance of LoginButton
+     * will result in an exception being thrown unless clearPermissions is called in between.
+     * <p/>
+     * This method is only meaningful if called before the session is open. If this is called
+     * after the session is opened, and the list of permissions passed in is not a subset
+     * of the permissions granted during the authorization, it will log an error.
+     * <p/>
+     * Since the session can be automatically opened when the LoginButton is constructed,
+     * it's important to always pass in a consistent set of permissions to this method, or
+     * manage the setting of permissions outside of the LoginButton class altogether
+     * (by managing the session explicitly).
+     *
+     * @param permissions the read permissions to use
+     *
+     * @throws UnsupportedOperationException if setReadPermissions has been called
+     * @throws IllegalArgumentException if permissions is null or empty
+     */
+    public void setPublishPermissions(String... permissions) {
+        loginButtonProperties.setPublishPermissions(Arrays.asList(permissions), getSession());
     }
 
 
@@ -307,20 +365,20 @@ public class UserSettingsFragment extends FacebookFragment {
             user = null;
         }
     }
-
+    
     private void updateUI() {
         if (!isAdded()) {
             return;
         }
         if (isSessionOpen()) {
-            connectedStateLabel.setTextColor(getResources().getColor(::APP_PACKAGE::.R.color.com_facebook_usersettingsfragment_connected_text_color));
+            connectedStateLabel.setTextColor(getResources().getColor(R.color.com_facebook_usersettingsfragment_connected_text_color));
             connectedStateLabel.setShadowLayer(1f, 0f, -1f,
-                    getResources().getColor(::APP_PACKAGE::.R.color.com_facebook_usersettingsfragment_connected_shadow_color));
-
+                    getResources().getColor(R.color.com_facebook_usersettingsfragment_connected_shadow_color));
+            
             if (user != null) {
                 ImageRequest request = getImageRequest();
                 if (request != null) {
-                    URL requestUrl = request.getImageUrl();
+                    URI requestUrl = request.getImageUri();
                     // Do we already have the right picture? If so, leave it alone.
                     if (!requestUrl.equals(connectedStateLabel.getTag())) {
                         if (user.getId().equals(userProfilePicID)) {
@@ -334,19 +392,19 @@ public class UserSettingsFragment extends FacebookFragment {
                 connectedStateLabel.setText(user.getName());
             } else {
                 connectedStateLabel.setText(getResources().getString(
-                        ::APP_PACKAGE::.R.string.com_facebook_usersettingsfragment_logged_in));
-                Drawable noProfilePic = getResources().getDrawable(::APP_PACKAGE::.R.drawable.com_facebook_profile_default_icon);
+                        R.string.com_facebook_usersettingsfragment_logged_in));
+                Drawable noProfilePic = getResources().getDrawable(R.drawable.com_facebook_profile_default_icon);
                 noProfilePic.setBounds(0, 0,
-                        getResources().getDimensionPixelSize(::APP_PACKAGE::.R.dimen.com_facebook_usersettingsfragment_profile_picture_width),
-                        getResources().getDimensionPixelSize(::APP_PACKAGE::.R.dimen.com_facebook_usersettingsfragment_profile_picture_height));
+                        getResources().getDimensionPixelSize(R.dimen.com_facebook_usersettingsfragment_profile_picture_width),
+                        getResources().getDimensionPixelSize(R.dimen.com_facebook_usersettingsfragment_profile_picture_height));
                 connectedStateLabel.setCompoundDrawables(null, noProfilePic, null, null);
             }
         } else {
-            int textColor = getResources().getColor(::APP_PACKAGE::.R.color.com_facebook_usersettingsfragment_not_connected_text_color);
+            int textColor = getResources().getColor(R.color.com_facebook_usersettingsfragment_not_connected_text_color);
             connectedStateLabel.setTextColor(textColor);
             connectedStateLabel.setShadowLayer(0f, 0f, 0f, textColor);
             connectedStateLabel.setText(getResources().getString(
-                    ::APP_PACKAGE::.R.string.com_facebook_usersettingsfragment_not_logged_in));
+                    R.string.com_facebook_usersettingsfragment_not_logged_in));
             connectedStateLabel.setCompoundDrawables(null, null, null, null);
             connectedStateLabel.setTag(null);
         }
@@ -359,8 +417,8 @@ public class UserSettingsFragment extends FacebookFragment {
                     getActivity(),
                     ImageRequest.getProfilePictureUrl(
                             user.getId(),
-                            getResources().getDimensionPixelSize(::APP_PACKAGE::.R.dimen.com_facebook_usersettingsfragment_profile_picture_width),
-                            getResources().getDimensionPixelSize(::APP_PACKAGE::.R.dimen.com_facebook_usersettingsfragment_profile_picture_height)));
+                            getResources().getDimensionPixelSize(R.dimen.com_facebook_usersettingsfragment_profile_picture_width),
+                            getResources().getDimensionPixelSize(R.dimen.com_facebook_usersettingsfragment_profile_picture_height)));
 
             request = requestBuilder.setCallerTag(this)
                     .setCallback(
@@ -371,7 +429,7 @@ public class UserSettingsFragment extends FacebookFragment {
                                 }
                             })
                     .build();
-        } catch (MalformedURLException e) {
+        } catch (URISyntaxException e) {
         }
         return request;
     }
@@ -382,12 +440,12 @@ public class UserSettingsFragment extends FacebookFragment {
             if (bitmap != null) {
                 BitmapDrawable drawable = new BitmapDrawable(UserSettingsFragment.this.getResources(), bitmap);
                 drawable.setBounds(0, 0,
-                        getResources().getDimensionPixelSize(::APP_PACKAGE::.R.dimen.com_facebook_usersettingsfragment_profile_picture_width),
-                        getResources().getDimensionPixelSize(::APP_PACKAGE::.R.dimen.com_facebook_usersettingsfragment_profile_picture_height));
+                        getResources().getDimensionPixelSize(R.dimen.com_facebook_usersettingsfragment_profile_picture_width),
+                        getResources().getDimensionPixelSize(R.dimen.com_facebook_usersettingsfragment_profile_picture_height));
                 userProfilePic = drawable;
                 userProfilePicID = id;
                 connectedStateLabel.setCompoundDrawables(null, drawable, null, null);
-                connectedStateLabel.setTag(response.getRequest().getImageUrl());
+                connectedStateLabel.setTag(response.getRequest().getImageUri());
             }
         }
     }

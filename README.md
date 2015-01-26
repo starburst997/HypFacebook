@@ -6,7 +6,7 @@ A Facebook native extension for NME
 This NME native extension allows you to integrate Facebook into your NME application.
 
 It integrates the [Facebook iOS SDK 3.5.1](https://github.com/facebook/facebook-ios-sdk)
-and the [Facebook Android SDK 3.0.1](https://github.com/facebook/facebook-android-sdk)
+and the [Facebook Android SDK 3.22.0](https://github.com/facebook/facebook-android-sdk)
 
 These are under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
 

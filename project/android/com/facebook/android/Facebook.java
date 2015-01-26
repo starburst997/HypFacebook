@@ -106,7 +106,7 @@ public class Facebook {
 
     // If the last time we extended the access token was more than 24 hours ago
     // we try to refresh the access token again.
-    final private long REFRESH_TOKEN_BARRIER = 24L * 60L * 60L * 1000L;
+    final private static long REFRESH_TOKEN_BARRIER = 24L * 60L * 60L * 1000L;
 
     /**
      * Constructor for Facebook object.
@@ -309,7 +309,7 @@ public class Facebook {
                 setCallback(callback).
                 setLoginBehavior(behavior).
                 setRequestCode(activityCode).
-                setPermissions(Arrays.asList(permissions));
+                setPermissions(Arrays.asList(pendingAuthorizationPermissions));
         openSession(pendingOpeningSession, openRequest, pendingAuthorizationPermissions.length > 0);
     }
 
@@ -531,9 +531,13 @@ public class Facebook {
         @Override
         public void onServiceDisconnected(ComponentName arg) {
             serviceListener.onError(new Error("Service disconnected"));
-            // We returned an error so there's no point in
-            // keeping the binding open.
-            applicationsContext.unbindService(TokenRefreshServiceConnection.this);
+            try {
+                // We returned an error so there's no point in
+                // keeping the binding open.
+                applicationsContext.unbindService(TokenRefreshServiceConnection.this);
+            } catch (IllegalArgumentException ex) {
+                // Do nothing, the connection was already unbound
+            }
         }
 
         private void refreshToken() {
@@ -612,11 +616,9 @@ public class Facebook {
                 }
             }
 
-            if (connection != null) {
-                // The refreshToken function should be called rarely,
-                // so there is no point in keeping the binding open.
-                connection.applicationsContext.unbindService(connection);
-            }
+            // The refreshToken function should be called rarely,
+            // so there is no point in keeping the binding open.
+            connection.applicationsContext.unbindService(connection);
         }
     }
 
@@ -1134,7 +1136,8 @@ public class Facebook {
     }
 
     private static String[] stringArray(List<String> list) {
-        String[] array = new String[list.size()];
+        int size = (list != null) ? list.size() : 0;
+        String[] array = new String[size];
 
         if (list != null) {
             for (int i = 0; i < array.length; i++) {
@@ -1222,23 +1225,6 @@ public class Facebook {
     @Deprecated
     public void setShouldAutoPublishInstall(boolean value) {
         Settings.setShouldAutoPublishInstall(value);
-    }
-
-    /**
-     * Manually publish install attribution to the Facebook graph.  Internally handles tracking repeat calls to prevent
-     * multiple installs being published to the graph.
-     * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Settings} for more info.
-     *
-     * @param context the current Android context
-     * @return Always false.  Earlier versions of the API returned true if it was no longer necessary to call.
-     * Apps should ignore this value, but for compatibility we will return false to ensure repeat calls (and the
-     * underlying code will prevent duplicate network traffic).
-     */
-    @Deprecated
-    public boolean publishInstall(final Context context) {
-        Settings.publishInstallAsync(context, mAppId);
-        return false;
     }
 
     /**
