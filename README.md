@@ -90,6 +90,8 @@ I/trace   (32187): nme_key_hash : +fr.hyperfiction.fbexample
 I/trace   (32187): PXR : pRqGr00vyKadfeNtfCttxWWk8JflaJk=
 ```
 
+If you don't have a "=" at the end of the hash, add it.
+
 Recompiling
 -----------
 For recompiling the native extensions just use the sh files contained in the project folder
