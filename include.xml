@@ -5,7 +5,7 @@
 	<ndll name="hypfacebook" if="android" />
 
 	<java path="project/android" if="android"/>
-	<echo value='|----------------------------------------------------------------------------|' if="android"/>
+	<!--<echo value='|----------------------------------------------------------------------------|' if="android"/>
 	<echo value='|                             /!\ [HypFacebook] /!\                          |' if="android"/>
 	<echo value='|----------------------------------------------------------------------------|' if="android"/>
 	<echo value='| Add the LoginActivity to your AndroidManifest.xml                          |' if="android"/>
@@ -15,7 +15,7 @@
 	<echo value='| Example with the template tag in the nmml file :                           |' if="android"/>
 	<echo value='| <template path="Export/android/bin/MainActivityFacebook.java"              |' if="android"/>
 	<echo value='|    rename="src/my/package/name/MainActivity.java"/>                        |' if="android"/>
-	<echo value="|----------------------------------------------------------------------------|" if="android"/>
+	<echo value="|----------------------------------------------------------------------------|" if="android"/>-->
 
 	<template path="/templates/android/MainActivity.java" rename="MainActivityFacebook.java" if="android"/>
 	<templatePath name="templates" />
@@ -26,7 +26,7 @@
 		<ndll name="hypfacebook" if="ios"/>
 
 		<section if="ios">
-			<echo value='|----------------------------------------------------------------------------|' if="ios"/>
+			<!--<echo value='|----------------------------------------------------------------------------|' if="ios"/>
 			<echo value='|                             /!\ [HypFacebook] /!\                          |' if="ios"/>
 			<echo value='|----------------------------------------------------------------------------|' if="ios"/>
 			<echo value='| Add a FacebookDisplayName key in your app-Info.plist with your app name:   |' if="ios"/>
@@ -52,7 +52,7 @@
 			<echo value="|----------------------------------------------------------------------------|" if="ios"/>
 			<echo value="| If you target ios < 6, toggle Security, Social, Accounts and AdSupport     |" if="ios"/>
 			<echo value="| to optional.                                                               |" if="ios"/>
-			<echo value="|----------------------------------------------------------------------------|" if="ios"/>
+			<echo value="|----------------------------------------------------------------------------|" if="ios"/>-->
 
             <!--<dependency name="ndll/iPhone/libhypfacebook.iphoneos-v7.a" />
             <ios linker-flags="-v -fobjc-arc -force_load $SRCROOT/$PRODUCT_NAME/lib/$ARCHS/libhypfacebook.iphoneos-v7.a" />-->
