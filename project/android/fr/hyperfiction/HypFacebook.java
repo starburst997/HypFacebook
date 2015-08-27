@@ -116,6 +116,10 @@ public class HypFacebook {
 		* @public
 		* @return	void
 		*/
+		public static boolean static_connect( boolean allowUI ){
+			return getInstance().connect( allowUI );
+		}
+		
 		public boolean connect( boolean allowUI ){
 			Session session = _createSession( );
 			trace( "Java: Session state: "+session.getState( ) );
@@ -138,6 +142,10 @@ public class HypFacebook {
 			}
 		}
 
+		public static boolean static_connectForPublish( boolean allowUI, String sPerms )  {
+			return getInstance().connectForPublish( allowUI, sPerms );
+		}
+		
 		public boolean connectForPublish( boolean allowUI, String sPerms )  {
 			Session session = _createSession( );
 			if ( session.isOpened( ) ) {
@@ -158,6 +166,10 @@ public class HypFacebook {
 			}
 		}
 
+		public static boolean static_connectForRead( boolean allowUI, String sPerms ) {
+			return getInstance().connectForRead( allowUI, sPerms );
+		}
+		
 		public boolean connectForRead( boolean allowUI, String sPerms ) {
 			trace("Java: connect for read, perms=" + sPerms);
 			Session session = _createSession( );
@@ -186,6 +198,10 @@ public class HypFacebook {
 		* @public
 		* @return	void
 		*/
+		public static void static_disconnect( ){
+			getInstance().disconnect();
+		}
+		
 		public void disconnect( ){
 	        Session session = Session.getActiveSession();
 		    if (session != null) {
@@ -201,6 +217,10 @@ public class HypFacebook {
 		* @public
 		* @return	void
 		*/
+		public static void static_show_dialog( final String sAction , String sKeys , String sVals ){
+			getInstance().show_dialog( sAction, sKeys, sVals );
+		}
+		
 		public void show_dialog( final String sAction , String sKeys , String sVals ){
 			trace("sKeys ::: "+sKeys);
 			trace("sVals ::: "+sVals);
@@ -240,6 +260,10 @@ public class HypFacebook {
 		* @public
 		* @return	void
 		*/
+		public static void static_graph_request( String sGraphRequest , String sKeys , String sVals , String sMethod ){
+			getInstance().graph_request( sGraphRequest, sKeys, sVals, sMethod );
+		}
+		
 		public void graph_request( String sGraphRequest , String sKeys , String sVals , String sMethod ){
 			trace("graph_request ::: "+sMethod);
 			Bundle params = stringTo_bundle( sKeys , sVals );
@@ -288,6 +312,10 @@ public class HypFacebook {
 		* @public
 		* @return	void
 		*/
+		public static void static_requestNew_publish_permissions( String sPerms ){
+			getInstance().requestNew_publish_permissions( sPerms );
+		}
+		
 		public void requestNew_publish_permissions( String sPerms ){
 			Session.NewPermissionsRequest req = _createRequestFromString( sPerms );
 			if( req != null ) {
@@ -309,6 +337,10 @@ public class HypFacebook {
 		* @public
 		* @return	void
 		*/
+		public static void static_requestNew_read_permissions( String sPerms ){
+			getInstance().requestNew_read_permissions( sPerms );
+		}
+		
 		public void requestNew_read_permissions( String sPerms ){
 			Session.NewPermissionsRequest req = _createRequestFromString( sPerms );
 			if( req != null ) {
@@ -330,6 +362,10 @@ public class HypFacebook {
 		* @public
 		* @return	void
 		*/
+		public static String static_getPermissions( ){
+			return getInstance().getPermissions( );
+		}
+		
 		public String getPermissions( ){
 
 			List<String> lPerms = Session.getActiveSession( ).getPermissions( );
@@ -402,8 +438,11 @@ public class HypFacebook {
 		* @return	void
 		*/
 		public static HypFacebook create( String sAppId ){
+			
 			Log.i( TAG, "HypFacebook :: create ::: "+sAppId );
-			return __instance = new HypFacebook( sAppId );
+			__instance = new HypFacebook( sAppId );
+			
+			return __instance;
 		}
 
 	// -------o misc
@@ -499,6 +538,11 @@ public class HypFacebook {
 		
 		// custom queue
 		private ArrayBlockingQueue<QueueEventObject> _eventQueue = new ArrayBlockingQueue<QueueEventObject>(20);
+		
+		public static String[] static_nextEvent()
+		{
+			return getInstance().nextEvent();
+		}
 		
 		public String[] nextEvent()
 		{
