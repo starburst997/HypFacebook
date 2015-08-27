@@ -67,7 +67,7 @@ import openfl.utils.Timer;
 
 			#if android
 			trace("DEBUG: Calling jni_connect");
-			bSessionValid = jni_connect( _JNI_instance, allowUI );
+			bSessionValid = jni_connect( allowUI );
 			#end
 
 			#if ios
@@ -86,7 +86,7 @@ import openfl.utils.Timer;
 			var bSessionValid = false;
 
 			#if android
-			bSessionValid = jni_connect_for_read( _JNI_instance, allowUI, permissions.join("&") );
+			bSessionValid = jni_connect_for_read( allowUI, permissions.join("&") );
 			#end
 
 			#if ios
@@ -108,7 +108,7 @@ import openfl.utils.Timer;
 			var bSessionValid = false;
 
 			#if android
-			bSessionValid = jni_connect_for_publish( _JNI_instance, allowUI, permissions.join("&") );
+			bSessionValid = jni_connect_for_publish( allowUI, permissions.join("&") );
 			#end
 
 			#if ios
@@ -126,7 +126,7 @@ import openfl.utils.Timer;
 		public function logout( ) : Void {
 
 			#if android
-			jni_disconnect( _JNI_instance );
+			jni_disconnect( );
 			#end
 
 			#if ios
@@ -175,7 +175,7 @@ import openfl.utils.Timer;
 			}
 
 			#if android
-			jni_graph_request( _JNI_instance , sRequest , _serializeHash( h , true ) ,_serializeHash( h , false ) , Type.enumConstructor( sMethod ) );
+			jni_graph_request( sRequest , _serializeHash( h , true ) ,_serializeHash( h , false ) , Type.enumConstructor( sMethod ) );
 			#end
 
 			#if ios
@@ -192,7 +192,7 @@ import openfl.utils.Timer;
 		public function requestNew_publish_permissions( a : Array<String> ) : Void {
 
 			#if android
-			jni_requestNew_publish_permissions( _JNI_instance , a.join("&"));
+			jni_requestNew_publish_permissions( a.join("&"));
 			#end
 
 			#if ios
@@ -209,7 +209,7 @@ import openfl.utils.Timer;
 		public function requestNew_read_permissions( a : Array<String> ) : Void {
 
 			#if android
-			jni_requestNew_read_permissions( _JNI_instance , a.join("&"));
+			jni_requestNew_read_permissions( a.join("&"));
 			#end
 
 			#if ios
@@ -225,7 +225,7 @@ import openfl.utils.Timer;
 		public function getSession_permissions( ) : Array<String> {
 
 			#if android
-				var perms = getPermissions( _JNI_instance );
+				var perms = getPermissions( );
 				trace( "perms ::: "+perms );
 				return perms.split("&");
 			#end
@@ -266,7 +266,7 @@ import openfl.utils.Timer;
 			trace("_dialog ::: "+sAction+" - "+params );
 
 			#if android
-				jni_dialog( _JNI_instance, sAction, _serializeHash( params , true ) , _serializeHash( params , false ) );
+				jni_dialog( sAction, _serializeHash( params , true ) , _serializeHash( params , false ) );
 			#end
 
 			#if ios
@@ -287,6 +287,8 @@ import openfl.utils.Timer;
 
 				HypFB_set_event_callback( _onEvent );
 				
+				_JNI_instance = create( _sApp_id ); // No longer working ???
+				
 				// queue for events
 				_timer = new Timer(50, 0); // 50ms
 				_timer.addEventListener(TimerEvent.TIMER, _update);
@@ -295,9 +297,7 @@ import openfl.utils.Timer;
 				#if debug
 				traceHash( );
 				#end
-
-				_JNI_instance = create( _sApp_id );
-
+				
 			#end
 
 			#if ios
@@ -309,8 +309,7 @@ import openfl.utils.Timer;
 		private var _timer:Timer;
 		private function _update(e:TimerEvent):Void
 		{
-			
-			var event:Array<String> = nextEvent(_JNI_instance);
+			var event:Array<String> = nextEvent();
 			if (event != null) {
 				_onEvent(event[0], event[1], event[2]);
 			}
@@ -567,72 +566,102 @@ import openfl.utils.Timer;
 		* @public
 		* @return	void
 		*/
-		@JNI("fr.hyperfiction.HypFacebook","connect")
-		public function jni_connect( instance : Dynamic, allowUI : Bool ) : Bool {
-
-		}
-
-		@JNI("fr.hyperfiction.HypFacebook","connectForPublish")
-		public function jni_connect_for_publish( instance : Dynamic, allowUI : Bool, permissions : String ) : Bool {
-
-		}
-
-		@JNI("fr.hyperfiction.HypFacebook","connectForRead")
-		public function jni_connect_for_read( instance : Dynamic, allowUI : Bool, permissions : String ) : Bool {
-
-		}
-
-		@JNI("fr.hyperfiction.HypFacebook","disconnect")
-		public function jni_disconnect( instance : Dynamic ) : Void {
-
-		}
-
-		@JNI("fr.hyperfiction.HypFacebook","show_dialog")
-		public function jni_dialog( instance : Dynamic, sAction : String, sKeys : String , sVals : String ) : Void {
-
-		}
-		
-		/**
-		*
-		*
-		* @public
-		* @return	void
-		*/
-		@JNI("fr.hyperfiction.HypFacebook","graph_request")
-		public function jni_graph_request(  instance : Dynamic , sGraphPath : String , sKeys : String , sVals : String , sMethod : String ) : Void{
-
-		}
-
-		/**
-		*
-		*
-		* @public
-		* @return	void
-		*/
-		@JNI("fr.hyperfiction.HypFacebook","requestNew_publish_permissions")
-		public function jni_requestNew_publish_permissions( instance : Dynamic , sPerms : String ) : Void {
-
-		}
-
-		/**
-		*
-		*
-		* @public
-		* @return	void
-		*/
-		@JNI("fr.hyperfiction.HypFacebook","requestNew_read_permissions")
-		public function jni_requestNew_read_permissions( instance : Dynamic , sPerms : String ) : Void{
-
-		}
-
-		@JNI
-		public function getPermissions( instance : Dynamic ) : String {
-
-		}
-		
-		@JNI
-		public function nextEvent( instance: Dynamic):Array<String> {
+		@JNI("fr.hyperfiction.HypFacebook","static_connect")
+		public static function static_connect( allowUI : Bool ) : Bool {
 			
+		}
+		public function jni_connect( allowUI : Bool ) : Bool {
+			return static_connect( allowUI );
+		}
+
+		@JNI("fr.hyperfiction.HypFacebook","static_connectForPublish")
+		public static function static_connect_for_publish( allowUI : Bool, permissions : String ) : Bool {
+
+		}
+		public function jni_connect_for_publish( allowUI : Bool, permissions : String ) : Bool {
+			return static_connect_for_publish( allowUI, permissions );
+		}
+
+		@JNI("fr.hyperfiction.HypFacebook","static_connectForRead")
+		public static function static_connect_for_read( allowUI : Bool, permissions : String ) : Bool {
+
+		}
+		public function jni_connect_for_read( allowUI : Bool, permissions : String ) : Bool {
+			return static_connect_for_read( allowUI, permissions );
+		}
+
+		@JNI("fr.hyperfiction.HypFacebook","static_disconnect")
+		public static function static_disconnect(  ) : Void {
+
+		}
+		public function jni_disconnect(  ) : Void {
+			static_disconnect();
+		}
+
+		@JNI("fr.hyperfiction.HypFacebook","static_show_dialog")
+		public static function static_dialog( sAction : String, sKeys : String , sVals : String ) : Void {
+
+		}
+		public function jni_dialog( sAction : String, sKeys : String , sVals : String ) : Void {
+			static_dialog( sAction, sKeys, sVals );
+		}
+		
+		/**
+		*
+		*
+		* @public
+		* @return	void
+		*/
+		@JNI("fr.hyperfiction.HypFacebook","static_graph_request")
+		public static function static_graph_request(  sGraphPath : String , sKeys : String , sVals : String , sMethod : String ) : Void{
+
+		}
+		public function jni_graph_request(  sGraphPath : String , sKeys : String , sVals : String , sMethod : String ) : Void{
+			static_graph_request( sGraphPath, sKeys, sVals, sMethod );
+		}
+
+		/**
+		*
+		*
+		* @public
+		* @return	void
+		*/
+		@JNI("fr.hyperfiction.HypFacebook","static_requestNew_publish_permissions")
+		public static function static_requestNew_publish_permissions( sPerms : String ) : Void {
+
+		}
+		public function jni_requestNew_publish_permissions( sPerms : String ) : Void {
+			static_requestNew_publish_permissions( sPerms );
+		}
+
+		/**
+		*
+		*
+		* @public
+		* @return	void
+		*/
+		@JNI("fr.hyperfiction.HypFacebook","static_requestNew_read_permissions")
+		public static function static_requestNew_read_permissions( sPerms : String ) : Void{
+
+		}
+		public function jni_requestNew_read_permissions( sPerms : String ) : Void{
+			static_requestNew_read_permissions( sPerms );
+		}
+
+		@JNI("fr.hyperfiction.HypFacebook","static_getPermissions")
+		public static function static_getPermissions(  ) : String {
+
+		}
+		public function getPermissions(  ) : String {
+			return static_getPermissions();
+		}
+		
+		@JNI("fr.hyperfiction.HypFacebook","static_nextEvent")
+		public static function static_nextEvent(  ):Array<String> {
+			
+		}
+		public function nextEvent(  ):Array<String> {
+			return static_nextEvent();
 		}
 
 		#end
